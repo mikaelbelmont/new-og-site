@@ -1,10 +1,6 @@
 import Image from "next/image";
 
-import { ArrowRight } from "lucide-react";
-
 import { DashedLine } from "../dashed-line";
-
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
@@ -17,14 +13,14 @@ import { cn } from "@/lib/utils";
 
 const items = [
   {
-    quote: "We're misusing Mainline as a CRM and it still works!",
+    quote: "We're misusing Verixian as a CRM and it still works!",
     author: "Amy Chase",
     role: "PM",
     company: "Mercury Finance",
     image: "/testimonials/amy-chase.webp",
   },
   {
-    quote: "I was able to replace 80% of my team with Mainline bots.",
+    quote: "I was able to replace 80% of my team with Verixian bots.",
     author: "Jonas Kotara",
     role: "Lead Engineer",
     company: "Mercury Finance",
@@ -45,14 +41,14 @@ const items = [
     image: "/testimonials/kundo-marta.webp",
   },
   {
-    quote: "We're misusing Mainline as a CRM and it still works!",
+    quote: "We're misusing Verixian as a CRM and it still works!",
     author: "Amy Chase",
     role: "PM",
     company: "Mercury Finance",
     image: "/testimonials/amy-chase.webp",
   },
   {
-    quote: "I was able to replace 80% of my team with Mainline bots.",
+    quote: "I was able to replace 80% of my team with Verixian bots.",
     author: "Jonas Kotara",
     role: "Lead Engineer",
     company: "Mercury Finance",
@@ -83,23 +79,9 @@ export const Testimonials = ({
 }) => {
   return (
     <>
-      <section className={cn("overflow-hidden py-28 lg:py-32", className)}>
+      <section className={cn("overflow-hidden py-16 lg:py-20", className)}>
         <div className="container">
-          <div className="space-y-4">
-            <h2 className="text-2xl tracking-tight md:text-4xl lg:text-5xl">
-              Trusted by product builders
-            </h2>
-            <p className="text-muted-foreground max-w-md leading-snug">
-              Mainline is built on the habits that make the best product teams
-              successful: staying focused, moving quickly, and always aiming for
-              high-quality work.
-            </p>
-            <Button variant="outline" className="shadow-md">
-              Read our Customer Stories <ArrowRight className="size-4" />
-            </Button>
-          </div>
-
-          <div className="relative mt-8 -mr-[max(3rem,calc((100vw-80rem)/2+3rem))] md:mt-12 lg:mt-20">
+          <div className="relative -mr-[max(3rem,calc((100vw-80rem)/2+3rem))]">
             <Carousel
               opts={{
                 align: "start",

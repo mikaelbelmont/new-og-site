@@ -63,8 +63,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "Mainline - Modern Next.js Template",
-    template: "%s | Mainline",
+    default: "Verixian - Modern Next.js Template",
+    template: "%s | Verixian",
   },
   description:
     "A modern Next.js template built with shadcn/ui, Tailwind & MDX. Open source - MIT License.",
@@ -102,22 +102,22 @@ export const metadata: Metadata = {
     shortcut: [{ url: "/favicon/favicon.ico" }],
   },
   openGraph: {
-    title: "Mainline - Modern Next.js Template",
+    title: "Verixian - Modern Next.js Template",
     description:
       "A modern Next.js template built with shadcn/ui, Tailwind & MDX. Open source - MIT License.",
-    siteName: "Mainline",
+    siteName: "Verixian",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Mainline - Modern Next.js Template",
+        alt: "Verixian - Modern Next.js Template",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Mainline - Modern Next.js Template",
+    title: "Verixian - Modern Next.js Template",
     description:
       "A modern Next.js template built with shadcn/ui, Tailwind & MDX. Open source - MIT License.",
     images: ["/og-image.jpg"],
@@ -133,24 +133,30 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link
+          href="https://assets.calendly.com/assets/external/widget.css"
+          rel="stylesheet"
+        />
         <script
           async
           crossOrigin="anonymous"
           src="https://tweakcn.com/live-preview.min.js"
         />
       </head>
-      <body className={`${dmSans.variable} ${inter.variable} antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <StyleGlideProvider />
-          <Navbar />
-          <main className="">{children}</main>
-          <Footer />
-        </ThemeProvider>
+      <body suppressHydrationWarning>
+        <div className={`${dmSans.variable} ${inter.variable} antialiased`}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <StyleGlideProvider />
+            <Navbar />
+            <main className="">{children}</main>
+            <Footer />
+          </ThemeProvider>
+        </div>
       </body>
     </html>
   );

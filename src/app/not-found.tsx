@@ -30,7 +30,7 @@ export default function NotFound() {
               asChild
               variant="outline"
               size="lg"
-              className="min-w-[200px]"
+              className="border-[#A3C5E0] bg-[#A3C5E0]/20 text-foreground hover:bg-[#A3C5E0]/30 min-w-[200px]"
             >
               <Link href="/contact">Contact Support</Link>
             </Button>

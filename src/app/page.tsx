@@ -1,24 +1,24 @@
 import { Background } from "@/components/background";
 import { FAQ } from "@/components/blocks/faq";
-import { Features } from "@/components/blocks/features";
 import { Hero } from "@/components/blocks/hero";
-import { Logos } from "@/components/blocks/logos";
-import { Pricing } from "@/components/blocks/pricing";
+import { Scheduling } from "@/components/blocks/scheduling";
 import { ResourceAllocation } from "@/components/blocks/resource-allocation";
-import { Testimonials } from "@/components/blocks/testimonials";
+import { FineAI } from "@/components/blocks/fine-ai";
+import { ChatBI } from "@/components/blocks/chat-bi";
+import { Stats } from "@/components/blocks/stats";
 
 export default function Home() {
   return (
     <>
+      <Hero />
+      <Stats />
       <Background className="via-muted to-muted/80">
-        <Hero />
-        <Logos />
-        <Features />
         <ResourceAllocation />
       </Background>
-      <Testimonials />
+      <FineAI />
+      <ChatBI />
       <Background variant="bottom">
-        <Pricing />
+        <Scheduling />
         <FAQ />
       </Background>
     </>

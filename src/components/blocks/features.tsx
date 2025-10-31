@@ -40,7 +40,7 @@ export const Features = () => {
             Made for modern product teams
           </h2>
           <p className="text-muted-foreground leading-snug">
-            Mainline is built on the habits that make the best product teams
+            Verixian is built on the habits that make the best product teams
             successful: staying focused, moving quickly, and always aiming for
             high-quality work.
           </p>

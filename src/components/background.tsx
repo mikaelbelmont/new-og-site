@@ -18,11 +18,24 @@ export const Background = ({
       className={cn(
         "relative mx-2.5 mt-2.5 lg:mx-4",
         variant === "top" &&
-          "from-primary/50 via-background to-background/80 rounded-t-4xl rounded-b-2xl bg-linear-to-b via-20%",
+          "rounded-t-4xl rounded-b-2xl bg-linear-to-b via-20%",
         variant === "bottom" &&
-          "from-background via-background to-primary/50 rounded-t-2xl rounded-b-4xl bg-linear-to-b",
+          "rounded-t-2xl rounded-b-4xl bg-linear-to-b",
         className,
       )}
+      style={
+        variant === "top"
+          ? {
+              background:
+                "linear-gradient(to bottom, rgba(71, 139, 194, 0.5), var(--background) 20%, rgba(248, 250, 252, 0.8))",
+            }
+          : variant === "bottom"
+            ? {
+                background:
+                  "linear-gradient(to bottom, var(--background), var(--background), rgba(71, 139, 194, 0.5))",
+              }
+            : undefined
+      }
     >
       {children}
     </div>
