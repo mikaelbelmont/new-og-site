@@ -264,6 +264,14 @@ body {
 .calendly-inline-widget {
   border-radius: 8px;
   overflow: hidden;
+  height: 1100px !important;
+}
+.calendly-inline-widget iframe {
+  height: 1100px !important;
+  overflow: hidden !important;
+}
+#calendly-embed {
+  overflow: hidden !important;
 }
 .calendly-overlay {
   display: none !important;

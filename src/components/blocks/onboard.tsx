@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Package, Zap, Target, Image as ImageIcon } from "lucide-react";
+import { Image as ImageIcon, Package, Target, Zap } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 interface Feature {
@@ -171,7 +172,7 @@ export function Onboard() {
                             {React.isValidElement(feature.icon) &&
                               React.cloneElement(feature.icon, {
                                 className: "size-6",
-                              } as any)}
+                              } as React.Attributes)}
                           </span>
                           <span>{feature.title}</span>
                         </button>

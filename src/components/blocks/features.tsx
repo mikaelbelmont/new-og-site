@@ -1,9 +1,13 @@
+"use client";
+
+import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 
 import { ChevronRight } from "lucide-react";
 
 import { DashedLine } from "../dashed-line";
+import { cn } from "@/lib/utils";
 
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -23,6 +27,32 @@ const items = [
 ];
 
 export const Features = () => {
+  const [visibleItems, setVisibleItems] = React.useState<Set<number>>(new Set());
+  const itemRefs = React.useRef<Map<number, HTMLDivElement>>(new Map());
+
+  React.useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+    items.forEach((_, index) => {
+      const ref = itemRefs.current.get(index);
+      if (!ref) return;
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setVisibleItems((prev) => new Set(prev).add(index));
+              observer.unobserve(entry.target as Element);
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
+      observer.observe(ref);
+      observers.push(observer);
+    });
+    return () => {
+      observers.forEach((obs) => obs.disconnect());
+    };
+  }, []);
   return (
     <section id="feature-modern-teams" className="pb-28 lg:pb-32">
       <div className="container">
@@ -49,8 +79,20 @@ export const Features = () => {
         {/* Features Card */}
         <Card className="mt-8 rounded-3xl md:mt-12 lg:mt-20">
           <CardContent className="flex p-0 max-md:flex-col">
-            {items.map((item, i) => (
-              <div key={i} className="flex flex-1 max-md:flex-col">
+            {items.map((item, i) => {
+              const isVisible = visibleItems.has(i);
+              return (
+              <div 
+                key={i} 
+                ref={(el) => {
+                  if (el) itemRefs.current.set(i, el);
+                }}
+                className={cn(
+                  "flex flex-1 max-md:flex-col transition-all duration-500 ease-out",
+                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+                )}
+                style={{ transitionDelay: isVisible ? `${i * 100}ms` : undefined }}
+              >
                 <div className="flex-1 p-4 pe-0! md:p-6">
                   <div className="relative aspect-[1.28/1] overflow-hidden">
                     <Image
@@ -87,7 +129,8 @@ export const Features = () => {
                   </div>
                 )}
               </div>
-            ))}
+              );
+            })}
           </CardContent>
         </Card>
       </div>

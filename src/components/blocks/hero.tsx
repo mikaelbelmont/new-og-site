@@ -1,38 +1,42 @@
-import {
-  Blend,
-  ChartNoAxesColumn,
-  CircleDot,
-  Diamond,
-} from "lucide-react";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
-import { DashedLine } from "@/components/dashed-line";
 import { Button } from "@/components/ui/button";
-
-const features = [
-  {
-    title: "Tailored workflows",
-    description: "Track progress across custom issue flows for your team.",
-    icon: CircleDot,
-  },
-  {
-    title: "Cross-team projects",
-    description: "Collaborate across teams and departments.",
-    icon: Blend,
-  },
-  {
-    title: "Milestones",
-    description: "Break projects down into concrete phases.",
-    icon: Diamond,
-  },
-  {
-    title: "Progress insights",
-    description: "Track scope, velocity, and progress over time.",
-    icon: ChartNoAxesColumn,
-  },
-];
+import { cn } from "@/lib/utils";
 
 export const Hero = () => {
+  const [visibleElements, setVisibleElements] = useState<Set<string>>(new Set());
+  const elementRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+    const elements = ['title', 'description', 'cta'];
+    
+    elements.forEach((elementId) => {
+      const ref = elementRefs.current.get(elementId);
+      if (!ref) return;
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setVisibleElements((prev) => new Set(prev).add(elementId));
+              observer.unobserve(entry.target as Element);
+            }
+          });
+        },
+        { threshold: 0.1 }
+      );
+      observer.observe(ref);
+      observers.push(observer);
+    });
+    
+    return () => {
+      observers.forEach((obs) => obs.disconnect());
+    };
+  }, []);
+
   return (
     <section id="hero" className="relative min-h-screen pt-32 pb-28 lg:pt-36 lg:pb-32">
       {/* Background Image with Gradient Overlay */}
@@ -43,7 +47,6 @@ export const Hero = () => {
           fill
           priority
           className="object-cover"
-          quality={90}
         />
         {/* Gradient overlay fading from transparent to background */}
         <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-background" />
@@ -51,17 +54,43 @@ export const Hero = () => {
 
       <div className="container pt-8 md:pt-12 lg:pt-16">
         <div className="relative z-10">
-          <h1 className="text-5xl tracking-tight md:text-6xl lg:text-7xl">
+          <h1 
+            ref={(el) => {
+              if (el) elementRefs.current.set('title', el);
+            }}
+            className={cn(
+              "text-5xl tracking-tight md:text-6xl lg:text-7xl transition-all duration-500 ease-out",
+              visibleElements.has('title') ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+            )}
+          >
           <span className="text-foreground">Automatize processos.</span><br />
           <span className="bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 bg-clip-text text-transparent">Aumente vendas.</span><br /> 
           <span className="text-foreground">Poupe tempo.</span><br />
           </h1>
 
-          <p className="text-muted-foreground max-w-2xl text-lg mt-5 md:text-xl">
+          <p 
+            ref={(el) => {
+              if (el) elementRefs.current.set('description', el);
+            }}
+            className={cn(
+              "text-muted-foreground max-w-2xl text-lg mt-5 md:text-xl transition-all duration-500 ease-out",
+              visibleElements.has('description') ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+            )}
+            style={{ transitionDelay: visibleElements.has('description') ? '100ms' : undefined }}
+          >
           Acelere Vendas, Assistência, Cobrança e Crédito e Propostas com fluxos inteligentes, de ponta a ponta.
           </p>
 
-          <div className="mt-8 flex flex-wrap items-center gap-4">
+          <div 
+            ref={(el) => {
+              if (el) elementRefs.current.set('cta', el);
+            }}
+            className={cn(
+              "mt-8 flex flex-wrap items-center gap-4 transition-all duration-500 ease-out",
+              visibleElements.has('cta') ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+            )}
+            style={{ transitionDelay: visibleElements.has('cta') ? '200ms' : undefined }}
+          >
             <Button 
               asChild
               style={{

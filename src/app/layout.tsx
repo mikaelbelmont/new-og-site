@@ -62,6 +62,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000")
+  ),
   title: {
     default: "Verixian - Modern Next.js Template",
     template: "%s | Verixian",
@@ -136,6 +140,10 @@ export default function RootLayout({
         <link
           href="https://assets.calendly.com/assets/external/widget.css"
           rel="stylesheet"
+        />
+        <script
+          type="text/javascript"
+          src="https://assets.calendly.com/assets/external/widget.js"
         />
         <script
           async

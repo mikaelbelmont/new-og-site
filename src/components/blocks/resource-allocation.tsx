@@ -1,14 +1,13 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-
 import { motion } from "motion/react";
-import { useEffect, useState } from "react";
+
+import { cn } from "@/lib/utils";
 
 import { DashedLine } from "../dashed-line";
 import MagnetLines from "../MagnetLines";
-
-import { cn } from "@/lib/utils";
 
 const topItems = [
   {
@@ -184,6 +183,39 @@ const ChatMock = () => {
 };
 
 export const ResourceAllocation = () => {
+  const [visibleItems, setVisibleItems] = useState<Set<string>>(new Set());
+  const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+    const totalItems = topItems.length + bottomItems.length;
+    
+    // Observe all items
+    for (let i = 0; i < totalItems; i++) {
+      const itemId = i < topItems.length ? `top-${i}` : `bottom-${i - topItems.length}`;
+      const ref = itemRefs.current.get(itemId);
+      if (!ref) continue;
+      
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setVisibleItems((prev) => new Set(prev).add(itemId));
+              observer.unobserve(entry.target as Element);
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
+      observer.observe(ref);
+      observers.push(observer);
+    }
+    
+    return () => {
+      observers.forEach((obs) => obs.disconnect());
+    };
+  }, []);
+
   return (
     <section
       id="resource-allocation"
@@ -205,9 +237,21 @@ export const ResourceAllocation = () => {
         <div className="mt-8 md:mt-12 lg:mt-20">
           {/* Top Features Grid - 2 items */}
           <div className="relative container flex max-md:flex-col">
-            {topItems.map((item, i) => (
-              <Item key={i} item={item} isLast={i === topItems.length - 1} />
-            ))}
+            {topItems.map((item, i) => {
+              const itemId = `top-${i}`;
+              const isVisible = visibleItems.has(itemId);
+              return (
+                <Item 
+                  key={i} 
+                  item={item} 
+                  isLast={i === topItems.length - 1}
+                  itemId={itemId}
+                  isVisible={isVisible}
+                  itemRefs={itemRefs}
+                  index={i}
+                />
+              );
+            })}
           </div>
           <DashedLine
             orientation="horizontal"
@@ -216,14 +260,22 @@ export const ResourceAllocation = () => {
 
           {/* Bottom Features Grid - 3 items */}
           <div className="relative container grid max-w-7xl md:grid-cols-3">
-            {bottomItems.map((item, i) => (
-              <Item
-                key={i}
-                item={item}
-                isLast={i === bottomItems.length - 1}
-                className="md:pb-0"
-              />
-            ))}
+            {bottomItems.map((item, i) => {
+              const itemId = `bottom-${i}`;
+              const isVisible = visibleItems.has(itemId);
+              return (
+                <Item
+                  key={i}
+                  item={item}
+                  isLast={i === bottomItems.length - 1}
+                  className="md:pb-0"
+                  itemId={itemId}
+                  isVisible={isVisible}
+                  itemRefs={itemRefs}
+                  index={i + topItems.length}
+                />
+              );
+            })}
           </div>
         </div>
       </div>
@@ -235,16 +287,26 @@ interface ItemProps {
   item: (typeof topItems)[number] | (typeof bottomItems)[number];
   isLast?: boolean;
   className?: string;
+  itemId: string;
+  isVisible: boolean;
+  itemRefs: React.MutableRefObject<Map<string, HTMLDivElement>>;
+  index: number;
 }
 
-const Item = ({ item, isLast, className }: ItemProps) => {
+const Item = ({ item, isLast, className, itemId, isVisible, itemRefs, index }: ItemProps) => {
   return (
     <div
+      ref={(el) => {
+        if (el) itemRefs.current.set(itemId, el);
+      }}
       className={cn(
         "relative flex flex-col justify-between px-0 py-6 md:px-6 md:py-8",
+        "transition-all duration-500 ease-out",
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5",
         className,
         item.className,
       )}
+      style={{ transitionDelay: isVisible ? `${index * 100}ms` : undefined }}
     >
       <div className="title-container space-y-2">
         <h3 className="text-xl font-semibold tracking-tight md:text-2xl">{item.title}</h3>

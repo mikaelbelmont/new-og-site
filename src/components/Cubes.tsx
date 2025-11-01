@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useRef } from 'react';
+
 import gsap from 'gsap';
+
 import './Cubes.css';
 
 interface Gap {
@@ -275,8 +277,12 @@ const Cubes: React.FC<CubesProps> = ({
       el.removeEventListener('touchstart', onTouchStart);
       el.removeEventListener('touchend', onTouchEnd);
 
-      rafRef.current != null && cancelAnimationFrame(rafRef.current);
-      idleTimerRef.current && clearTimeout(idleTimerRef.current);
+      if (rafRef.current != null) {
+        cancelAnimationFrame(rafRef.current);
+      }
+      if (idleTimerRef.current) {
+        clearTimeout(idleTimerRef.current);
+      }
     };
   }, [onPointerMove, resetAll, onClick, onTouchMove, onTouchStart, onTouchEnd]);
 

@@ -1,8 +1,42 @@
+"use client";
+
 import Link from "next/link";
+import { useState, useEffect, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export function Footer() {
+  const [visibleElements, setVisibleElements] = useState<Set<string>>(new Set());
+  const elementRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+    const elements = ['cta-title', 'cta-description', 'cta-button'];
+    
+    elements.forEach((elementId) => {
+      const ref = elementRefs.current.get(elementId);
+      if (!ref) return;
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setVisibleElements((prev) => new Set(prev).add(elementId));
+              observer.unobserve(entry.target as Element);
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
+      observer.observe(ref);
+      observers.push(observer);
+    });
+    
+    return () => {
+      observers.forEach((obs) => obs.disconnect());
+    };
+  }, []);
+
   const navigation = [
     { name: "Funcionalidades", href: "/#fine-ai" },
     { name: "FineAI", href: "/#fine-ai" },
@@ -17,13 +51,39 @@ export function Footer() {
   return (
     <footer className="flex flex-col items-center gap-14 pt-28 lg:pt-32">
       <div className="container space-y-3 text-center">
-        <h2 className="text-2xl tracking-tight md:text-4xl lg:text-5xl">
+        <h2 
+          ref={(el) => {
+            if (el) elementRefs.current.set('cta-title', el);
+          }}
+          className={cn(
+            "text-2xl tracking-tight md:text-4xl lg:text-5xl transition-all duration-500 ease-out",
+            visibleElements.has('cta-title') ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+          )}
+        >
           Pronto para acelerar seu negócio?
         </h2>
-        <p className="text-muted-foreground mx-auto max-w-xl leading-snug text-balance">
+        <p 
+          ref={(el) => {
+            if (el) elementRefs.current.set('cta-description', el);
+          }}
+          className={cn(
+            "text-muted-foreground mx-auto max-w-xl leading-snug text-balance transition-all duration-500 ease-out",
+            visibleElements.has('cta-description') ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+          )}
+          style={{ transitionDelay: visibleElements.has('cta-description') ? '100ms' : undefined }}
+        >
           Comece hoje mesmo. Agende uma demonstração gratuita e veja como podemos automatizar seus processos, aumentar vendas e poupar tempo.
         </p>
-        <div>
+        <div 
+          ref={(el) => {
+            if (el) elementRefs.current.set('cta-button', el);
+          }}
+          className={cn(
+            "transition-all duration-500 ease-out",
+            visibleElements.has('cta-button') ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+          )}
+          style={{ transitionDelay: visibleElements.has('cta-button') ? '200ms' : undefined }}
+        >
           <Button 
             size="lg" 
             className="mt-4" 

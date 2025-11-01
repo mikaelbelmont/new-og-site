@@ -1,8 +1,10 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import CountUp from "react-countup";
 import { useInView } from "motion/react";
+
+import { cn } from "@/lib/utils";
 
 const stats = [
   {
@@ -31,13 +33,52 @@ const stats = [
 export const Stats = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
+  
+  const [visibleStats, setVisibleStats] = useState<Set<string>>(new Set());
+  const statRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+    stats.forEach((stat) => {
+      const statRef = statRefs.current.get(stat.id);
+      if (!statRef) return;
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setVisibleStats((prev) => new Set(prev).add(stat.id));
+              observer.unobserve(entry.target as Element);
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
+      observer.observe(statRef);
+      observers.push(observer);
+    });
+    return () => {
+      observers.forEach((obs) => obs.disconnect());
+    };
+  }, []);
 
   return (
     <section id="stats" ref={ref} className="py-3 lg:py-6">
       <div className="container">
         <div className="relative mx-auto flex max-w-5xl items-center justify-between border-b pb-8 md:gap-4 lg:gap-8">
-          {stats.map((stat, index) => (
-            <div key={stat.id} className="relative flex-1 text-center">
+          {stats.map((stat, index) => {
+            const isVisible = visibleStats.has(stat.id);
+            return (
+            <div 
+              key={stat.id} 
+              ref={(el) => {
+                if (el) statRefs.current.set(stat.id, el);
+              }}
+              className={cn(
+                "relative flex-1 text-center transition-all duration-500 ease-out",
+                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+              )}
+              style={{ transitionDelay: isVisible ? `${index * 100}ms` : undefined }}
+            >
               {/* Divider line for items after the first */}
               {index > 0 && (
                 <div className="absolute left-0 top-1/2 hidden h-[60%] -translate-y-1/2 border-l md:block" />
@@ -66,7 +107,8 @@ export const Stats = () => {
                 {stat.label}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

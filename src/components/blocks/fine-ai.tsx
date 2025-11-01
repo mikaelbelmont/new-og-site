@@ -1,44 +1,47 @@
 "use client";
 
 import * as React from "react";
-import { Rocket, CheckCircle, Shield, Image as ImageIcon } from "lucide-react";
+import { CheckCircle, Image as ImageIcon, Rocket, Shield } from "lucide-react";
+
 import { cn } from "@/lib/utils";
- 
+
 interface Feature {
   id: string;
-  icon: React.ComponentType<{ className?: string; strokeWidth?: number; style?: React.CSSProperties }>;
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number;   style?: React.CSSProperties }>;
   title: string;
   content: string;
 }
 
-export const FineAI = () => {
-  const features: Feature[] = [
-    {
-      id: "modules",
-      icon: Rocket,
-      title: "Velocidade sem esforço",
-      content:
-        "Processa propostas em segundos com leitura automática de campos e preenchimento inteligente. Elimine tarefas repetitivas e ganhe tempo para o que realmente importa — fechar negócios.",
-    },
-    {
-      id: "conversion",
-      icon: CheckCircle,
-      title: "Menos erros, mais produtividade",
-      content:
-        "Beneficie-se de validações automáticas, pré-preenchimento de dados e deteção de inconsistências em tempo real. Reduza falhas humanas e mantenha a precisão em todas as etapas do processo.",
-    },
-    {
-      id: "collection",
-      icon: Shield,
-      title: "Total conformidade e segurança",
-      content:
-        "Os dados são tratados com encriptação ponta a ponta e seguem normas de conformidade como o RGPD. Cada proposta é processada com rastreabilidade e controlo total de acesso.",
-    },
-  ];
+const features: Feature[] = [
+  {
+    id: "modules",
+    icon: Rocket,
+    title: "Velocidade sem esforço",
+    content:
+      "Processa propostas em segundos com leitura automática de campos e preenchimento inteligente. Elimine tarefas repetitivas e ganhe tempo para o que realmente importa — fechar negócios.",
+  },
+  {
+    id: "conversion",
+    icon: CheckCircle,
+    title: "Menos erros, mais produtividade",
+    content:
+      "Beneficie-se de validações automáticas, pré-preenchimento de dados e deteção de inconsistências em tempo real. Reduza falhas humanas e mantenha a precisão em todas as etapas do processo.",
+  },
+  {
+    id: "collection",
+    icon: Shield,
+    title: "Total conformidade e segurança",
+    content:
+      "Os dados são tratados com encriptação ponta a ponta e seguem normas de conformidade como o RGPD. Cada proposta é processada com rastreabilidade e controlo total de acesso.",
+  },
+];
 
+export const FineAI = () => {
   const [activeFeature, setActiveFeature] = React.useState<string>(features[0].id);
   const [visibleFeatures, setVisibleFeatures] = React.useState<Set<string>>(new Set());
+  const [visibleElements, setVisibleElements] = React.useState<Set<string>>(new Set());
   const featureRefs = React.useRef<Map<string, HTMLLIElement>>(new Map());
+  const elementRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
   const rotationTimeoutRef = React.useRef<number | null>(null);
 
   React.useEffect(() => {
@@ -60,6 +63,33 @@ export const FineAI = () => {
       observer.observe(ref);
       observers.push(observer);
     });
+    return () => {
+      observers.forEach((obs) => obs.disconnect());
+    };
+  }, []);
+
+  React.useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+    const elements = ['title', 'image', 'heading', 'description'];
+    
+    elements.forEach((elementId) => {
+      const ref = elementRefs.current.get(elementId);
+      if (!ref) return;
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setVisibleElements((prev) => new Set(prev).add(elementId));
+              observer.unobserve(entry.target as Element);
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
+      observer.observe(ref);
+      observers.push(observer);
+    });
+    
     return () => {
       observers.forEach((obs) => obs.disconnect());
     };
@@ -122,7 +152,15 @@ export const FineAI = () => {
       
       <div className="relative z-10 container">
         {/* Section Title */}
-        <div className="mb-8 sm:mb-10 md:mb-12">
+        <div 
+          ref={(el) => {
+            if (el) elementRefs.current.set('title', el);
+          }}
+          className={cn(
+            "mb-8 sm:mb-10 md:mb-12 transition-all duration-500 ease-out",
+            visibleElements.has('title') ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+          )}
+        >
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-center">
             Fine AI
           </h2>
@@ -130,7 +168,16 @@ export const FineAI = () => {
         {/* Substituted content: Onboard-like section */}
         <div className="flex flex-col lg:flex-row lg:items-start gap-6 md:gap-8 lg:gap-12">
           {/* Left column: Image placeholder */}
-          <div className="flex-1 lg:flex-[1_1_40%] min-w-0">
+          <div 
+            ref={(el) => {
+              if (el) elementRefs.current.set('image', el);
+            }}
+            className={cn(
+              "flex-1 lg:flex-[1_1_40%] min-w-0 transition-all duration-500 ease-out",
+              visibleElements.has('image') ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+            )}
+            style={{ transitionDelay: visibleElements.has('image') ? '100ms' : undefined }}
+          >
             <div className="relative w-full aspect-[4/5] max-w-md mx-auto lg:max-w-none">
               <div className="relative w-full h-full rounded-xl sm:rounded-2xl overflow-hidden border border-border bg-muted/50 shadow-lg">
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -146,11 +193,29 @@ export const FineAI = () => {
           {/* Right column: Content */}
           <div className="flex-1 lg:flex-[1_1_45%] min-w-0">
             <div className="space-y-4 md:space-y-8">
-              <h3 className="text-4xl sm:text-5xl md:text-6xl lg:text-5xl font-bold tracking-tight leading-tight">
+              <h3 
+                ref={(el) => {
+                  if (el) elementRefs.current.set('heading', el);
+                }}
+                className={cn(
+                  "text-4xl sm:text-5xl md:text-6xl lg:text-5xl font-bold tracking-tight leading-tight transition-all duration-500 ease-out",
+                  visibleElements.has('heading') ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+                )}
+                style={{ transitionDelay: visibleElements.has('heading') ? '200ms' : undefined }}
+              >
               Automatize o processamento de propostas
               </h3>
 
-              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
+              <p 
+                ref={(el) => {
+                  if (el) elementRefs.current.set('description', el);
+                }}
+                className={cn(
+                  "text-lg md:text-xl text-muted-foreground leading-relaxed transition-all duration-500 ease-out",
+                  visibleElements.has('description') ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+                )}
+                style={{ transitionDelay: visibleElements.has('description') ? '300ms' : undefined }}
+              >
                 Otimize processos sem aumentar a equipa: extração inteligente, validação automática e integração direta com as ferramentas que já utiliza, tudo sem código.
               </p>
 
@@ -168,7 +233,7 @@ export const FineAI = () => {
                         "transition-all duration-500 ease-out",
                         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
                       )}
-                      style={{ transitionDelay: isVisible ? `${index * 100}ms` : undefined }}
+                      style={{ transitionDelay: isVisible ? `${400 + (index * 100)}ms` : undefined }}
                     >
                       <div className="space-y-2">
                         <button

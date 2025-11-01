@@ -1,6 +1,5 @@
 import Image from "next/image";
 
-import { DashedLine } from "../dashed-line";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
@@ -10,6 +9,8 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
+
+import { DashedLine } from "../dashed-line";
 
 const items = [
   {

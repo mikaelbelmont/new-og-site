@@ -1,7 +1,12 @@
-import { ChatPanel } from "@/components/chat-panel"
-import { DashedLine } from "../dashed-line"
-import { cn } from "@/lib/utils"
-import { Brain, Sparkles, Route, MessageSquare } from "lucide-react"
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { Brain, MessageSquare, Route, Sparkles } from "lucide-react";
+
+import { ChatPanel } from "@/components/chat-panel";
+import { cn } from "@/lib/utils";
+
+import { DashedLine } from "../dashed-line";
 
 const chatMessages = [
   {
@@ -146,6 +151,36 @@ const features = [
 ]
 
 export function ChatBI() {
+  const [visibleElements, setVisibleElements] = useState<Set<string>>(new Set());
+  const elementRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+    const allElements = ['title', 'chat-panel', ...features.map((_, idx) => `feature-${idx}`)];
+    
+    allElements.forEach((elementId) => {
+      const ref = elementRefs.current.get(elementId);
+      if (!ref) return;
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setVisibleElements((prev) => new Set(prev).add(elementId));
+              observer.unobserve(entry.target as Element);
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
+      observer.observe(ref);
+      observers.push(observer);
+    });
+    
+    return () => {
+      observers.forEach((obs) => obs.disconnect());
+    };
+  }, []);
+
   return (
     <section id="chat-bi" className="relative overflow-hidden pb-28 lg:pb-32">
       {/* SVG Gradient Definition */}
@@ -168,7 +203,15 @@ export function ChatBI() {
       />
       
       <div className="relative z-10 pt-28 lg:pt-32">
-        <h2 className="container text-center text-3xl tracking-tight text-balance sm:text-4xl md:text-5xl lg:text-6xl">
+        <h2 
+          ref={(el) => {
+            if (el) elementRefs.current.set('title', el);
+          }}
+          className={cn(
+            "container text-center text-3xl tracking-tight text-balance sm:text-4xl md:text-5xl lg:text-6xl transition-all duration-500 ease-out",
+            visibleElements.has('title') ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+          )}
+        >
           Chat-BI
         </h2>
 
@@ -179,8 +222,19 @@ export function ChatBI() {
               <div className="space-y-8 md:space-y-10 lg:space-y-12">
                 {features.map((feature, idx) => {
                   const Icon = feature.icon;
+                  const isVisible = visibleElements.has(`feature-${idx}`);
                   return (
-                    <div key={idx} className="text-balance space-y-2">
+                    <div 
+                      key={idx} 
+                      ref={(el) => {
+                        if (el) elementRefs.current.set(`feature-${idx}`, el);
+                      }}
+                      className={cn(
+                        "text-balance space-y-2 transition-all duration-500 ease-out",
+                        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+                      )}
+                      style={{ transitionDelay: isVisible ? `${100 + (idx * 100)}ms` : undefined }}
+                    >
                       <div className="flex items-center gap-3">
                         <div className="relative">
                           <Icon 
@@ -201,7 +255,16 @@ export function ChatBI() {
             <DashedLine orientation="vertical" className="absolute top-0 right-1/2 max-md:hidden" />
 
             {/* Chat Panel Column */}
-            <div className={cn("relative flex flex-col justify-center px-0 py-6 md:pl-0 md:pr-6 md:py-8 flex-1")}>
+            <div 
+              ref={(el) => {
+                if (el) elementRefs.current.set('chat-panel', el);
+              }}
+              className={cn(
+                "relative flex flex-col justify-center px-0 py-6 md:pl-0 md:pr-6 md:py-8 flex-1 transition-all duration-500 ease-out",
+                visibleElements.has('chat-panel') ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+              )}
+              style={{ transitionDelay: visibleElements.has('chat-panel') ? '100ms' : undefined }}
+            >
               <ChatPanel messages={chatMessages} title="Chat-BI" />
             </div>
           </div>

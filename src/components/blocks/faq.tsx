@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useState, useEffect, useRef } from "react";
 
 import {
   Accordion,
@@ -80,11 +83,49 @@ export const FAQ = ({
   className?: string;
   className2?: string;
 }) => {
+  const [visibleElements, setVisibleElements] = useState<Set<string>>(new Set());
+  const elementRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+    const allElements = ['header', ...categories.map((_, idx) => `category-${idx}`)];
+    
+    allElements.forEach((elementId) => {
+      const ref = elementRefs.current.get(elementId);
+      if (!ref) return;
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setVisibleElements((prev) => new Set(prev).add(elementId));
+              observer.unobserve(entry.target as Element);
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
+      observer.observe(ref);
+      observers.push(observer);
+    });
+    
+    return () => {
+      observers.forEach((obs) => obs.disconnect());
+    };
+  }, []);
+
   return (
-    <section id="faq" className={cn("py-28 lg:py-32", className)}>
+    <section id="faq" className={cn("pt-28 pb-28 lg:pt-32 lg:pb-32 scroll-mt-20", className)}>
       <div className="container max-w-5xl">
         <div className={cn("mx-auto grid gap-16 lg:grid-cols-2", className2)}>
-          <div className="space-y-4">
+          <div 
+            ref={(el) => {
+              if (el) elementRefs.current.set('header', el);
+            }}
+            className={cn(
+              "space-y-4 transition-all duration-500 ease-out",
+              visibleElements.has('header') ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+            )}
+          >
             {headerTag === "h1" ? (
               <h1 className="text-2xl tracking-tight md:text-4xl lg:text-5xl">
                 Tem perguntas?
@@ -104,8 +145,20 @@ export const FAQ = ({
           </div>
 
           <div className="grid gap-6 text-start">
-            {categories.map((category, categoryIndex) => (
-              <div key={category.title} className="">
+            {categories.map((category, categoryIndex) => {
+              const isVisible = visibleElements.has(`category-${categoryIndex}`);
+              return (
+              <div 
+                key={category.title} 
+                ref={(el) => {
+                  if (el) elementRefs.current.set(`category-${categoryIndex}`, el);
+                }}
+                className={cn(
+                  "transition-all duration-500 ease-out",
+                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+                )}
+                style={{ transitionDelay: isVisible ? `${100 + (categoryIndex * 100)}ms` : undefined }}
+              >
                 <h3 className="text-muted-foreground border-b py-4">
                   {category.title}
                 </h3>
@@ -120,7 +173,8 @@ export const FAQ = ({
                   ))}
                 </Accordion>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
